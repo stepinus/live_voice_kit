@@ -53,7 +53,7 @@ def prewarm(proc: JobProcess) -> None:
     # Create LocalTTS instance (lazy initialization)
     tts_engine = LocalTTS(
         language="ru",
-        model_path="nvidia/llama-3.3-nemotron-super-49b-v1",
+        model_path="XTTS_Lasinya",
         voice_reference_path="voice/reference_audio.wav",
         device="cpu",
     )
@@ -62,6 +62,14 @@ def prewarm(proc: JobProcess) -> None:
 
 async def entrypoint(ctx: JobContext) -> None:
     """Main entry point for the OpenAI agent"""
+
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    if not openai_api_key:
+        raise ValueError("OPENAI_API_KEY is not set in environment variables")
+
+    fal_api_key = os.getenv("FAL_KEY")
+    if not fal_api_key:
+        raise ValueError("FAL_KEY is not set in environment variables")
 
     # Set up logging context
     ctx.log_context_fields = {
@@ -72,13 +80,13 @@ async def entrypoint(ctx: JobContext) -> None:
     session: AgentSession = AgentSession(
         vad=ctx.proc.userdata["vad"],
         llm=openai.LLM(
-            model="qwen/qwen3-8b",
-            api_key="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",
-            base_url="https://openrouter.ai/api/v1",
-            max_completion_tokens=1000,
+            model="nvidia/llama-3.3-nemotron-super-49b-v1",
+            api_key=openai_api_key,
+            base_url="https://openai.ai/api/v1",
+            max_completion_tokens=2000,
         ),
         stt=fal.WizperSTT(
-            api_key="efcf420b-f475-4ea1-b3d8-0e67e69551db:3cbe0ff985bd8aa96161d3b265efe88e",
+            api_key=fal_api_key,
             language="ru",
         ),
         tts=ctx.proc.userdata["tts"],

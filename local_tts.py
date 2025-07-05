@@ -120,7 +120,7 @@ class LocalTTS(tts.TTS):
         )
 
         self._language = language
-        self._model_path = f"/Users/y.stepin/dev/agents/{model_path}"
+        self._model_path = f"a{model_path}"
         self._voice_reference_path = f"/Users/y.stepin/dev/agents/{voice_reference_path}"
         self._device = device
         self._engine: CoquiEngine | None = None
@@ -142,12 +142,8 @@ class LocalTTS(tts.TTS):
         try:
             # Initialize CoquiEngine with voice cloning
             self._engine = CoquiEngine(
-                model_name="tts_models/multilingual/multi-dataset/xtts_v2",  # Standard XTTS v2 model
-                specific_model="Lasinya",  # Our custom model name
-                local_models_path="/Users/y.stepin/dev/agents/models",  # Path to models folder
                 language=self._language,
                 device=self._device,
-                voice=self._voice_reference_path
             )
             
             logger.info("XTTS engine initialized successfully")

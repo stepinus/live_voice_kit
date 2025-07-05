@@ -27,7 +27,10 @@ python openai_agent.py console
 ```bash  
 python openai_agent.py dev
 ```
-
+````
+bash
+https://huggingface.co/KoljaB/XTTS_Lasinya
+````
 ### Продакшн режим
 ```bash
 python openai_agent.py start
