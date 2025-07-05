@@ -14,7 +14,7 @@ from livekit.agents import (
     cli,
     metrics,
 )
-from livekit.agents.llm import function_tool
+# from livekit.agents.llm import function_tool
 from livekit.agents.voice import MetricsCollectedEvent
 from livekit.plugins import fal, openai, silero
 from local_tts import LocalTTS
@@ -52,7 +52,7 @@ def prewarm(proc: JobProcess) -> None:
     # Create LocalTTS instance (lazy initialization)
     tts_engine = LocalTTS(
         language="ru",
-        model_path="XTTS_models/Lasinya",
+        model_path="models/Samantha",
         voice_reference_path="characters/reference_audio.wav",
         device="cpu",
     )

@@ -2,3 +2,5 @@
 __pycache__
 .env.local
 .venv
+models/**/*
+.DS_Store

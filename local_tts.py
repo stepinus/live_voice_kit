@@ -10,7 +10,7 @@ from livekit.agents import tts, utils, APIConnectOptions
 from livekit.agents.tts import TTSCapabilities
 from livekit.agents.types import DEFAULT_API_CONNECT_OPTIONS
 
-from RealtimeTTS import TextToAudioStream, CoquiEngine, CoquiVoice
+from RealtimeTTS import TextToAudioStream, CoquiEngine
 
 logger = logging.getLogger(__name__)
 
@@ -90,7 +90,7 @@ class LocalTTS(tts.TTS):
         self,
         *,
         language: str = "ru",
-        model_path: str = "XTTS_models/Lasinya",
+        model_path: str = "models/Samantha",
         voice_reference_path: str = "characters/reference_audio.wav",
         device: str = "cpu",
         sample_rate: int = 24000,
@@ -132,19 +132,47 @@ class LocalTTS(tts.TTS):
             raise FileNotFoundError(f"Voice reference file not found: {self._voice_reference_path}")
 
         try:
-            # Initialize CoquiEngine with voice cloning
+            # Import required modules
+            import torch
+            from TTS.tts.layers.xtts.xtts_manager import is_pytorch_at_least_2_4
+
+            # Set environment variable to agree to XTTS license
+            os.environ['COQUI_TOS_AGREED'] = '1'
+
+            # Store originals
+            original_load = torch.load
+            original_version_check = is_pytorch_at_least_2_4
+
+            # Patch torch.load to always use weights_only=False
+            def patched_load(*args, **kwargs):
+                kwargs['weights_only'] = False
+                return original_load(*args, **kwargs)
+
+            # Patch version check to return False (disable weights_only)
+            def patched_version_check():
+                return False
+
+            # Apply patches
+            torch.load = patched_load
+            import TTS.tts.layers.xtts.xtts_manager
+            TTS.tts.layers.xtts.xtts_manager.is_pytorch_at_least_2_4 = patched_version_check
+
+            # Initialize CoquiEngine with standard XTTS model
             self._engine = CoquiEngine(
-                voice=CoquiVoice(
-                    model_path=self._model_path,
-                    local_models_path=self._model_path,
-                    device=self._device,
-                    enable_text_splitting=True,
-                    language=self._language
-                )
+                model_name="tts_models/multilingual/multi-dataset/xtts_v2",  # Standard XTTS v2 model
+                specific_model="Samantha",  # Our custom model name
+                local_models_path="models",  # Path to models folder
+                language=self._language,
+                device=self._device,
+                voice=self._voice_reference_path
             )
-            
+
+            # Restore originals
+            torch.load = original_load
+            TTS.tts.layers.xtts.xtts_manager.is_pytorch_at_least_2_4 = original_version_check
+
             logger.info("XTTS engine initialized successfully")
-            
+
         except Exception as e:
             logger.error("Failed to initialize XTTS engine: %s", e)
             raise
@@ -217,7 +245,7 @@ class ChunkedStream(tts.ChunkedStream):
             # Start async synthesis with callbacks
             stream.play_async(
                 on_audio_chunk=on_audio_chunk,
-                before_sentence_synthesized=before_sentence_synthesized,
+                beчfore_sentence_synthesized=before_sentence_synthesized,
                 log_synthesized_text=True,
                 language=self._tts._language,
                 fast_sentence_fragment_allsentences_multiple=True,
