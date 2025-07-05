@@ -6,10 +6,10 @@ sounddevice
 pyaudio
 torch
 python-dotenv
-transformers==4.39.3
-networkx==2.8.8
-typing_extensions==4.8.0
-fsspec==2023.6.0
-imageio==2.31.6
-numpy==1.24.3
-requests==2.31.0 
+transformers
+networkx
+typing_extensions
+fsspec
+imageio
+numpy
+requests
