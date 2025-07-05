@@ -10,7 +10,6 @@ from livekit.agents import (
     JobProcess,
     RoomInputOptions,
     RoomOutputOptions,
-    RunContext,
     WorkerOptions,
     cli,
     metrics,
@@ -53,8 +52,8 @@ def prewarm(proc: JobProcess) -> None:
     # Create LocalTTS instance (lazy initialization)
     tts_engine = LocalTTS(
         language="ru",
-        model_path="XTTS_Lasinya",
-        voice_reference_path="voice/reference_audio.wav",
+        model_path="XTTS_models/Lasinya",
+        voice_reference_path="characters/reference_audio.wav",
         device="cpu",
     )
     proc.userdata["tts"] = tts_engine
@@ -82,7 +81,7 @@ async def entrypoint(ctx: JobContext) -> None:
         llm=openai.LLM(
             model="nvidia/llama-3.3-nemotron-super-49b-v1",
             api_key=openai_api_key,
-            base_url="https://openai.ai/api/v1",
+            base_url="https://openrouter.ai/api/v1/",
             max_completion_tokens=2000,
         ),
         stt=fal.WizperSTT(

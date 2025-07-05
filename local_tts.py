@@ -10,6 +10,8 @@ from livekit.agents import tts, utils, APIConnectOptions
 from livekit.agents.tts import TTSCapabilities
 from livekit.agents.types import DEFAULT_API_CONNECT_OPTIONS
 
+from RealtimeTTS import TextToAudioStream, CoquiEngine, CoquiVoice
+
 logger = logging.getLogger(__name__)
 
 
@@ -18,10 +20,8 @@ class SSEParser:
     Парсер для Server-Sent Events (SSE) потоков от OpenAI/OpenRouter API.
     Извлекает чистый текст из JSON-ответов в формате streaming.
     """
-    
     def __init__(self):
-        self.buffer = ""
-    
+        self.buffer = ""  
     def parse_chunk(self, chunk: str) -> list[str]:
         """
         Парсит чанк SSE данных и возвращает извлеченный текст.
@@ -33,11 +33,9 @@ class SSEParser:
             Список текстовых фрагментов, извлеченных из JSON
         """
         if not chunk:
-            return []
-            
+            return []          
         self.buffer += chunk
-        extracted_texts = []
-        
+        extracted_texts = []      
         while True:
             # Ищем следующую полную SSE строку
             line_end = self.buffer.find('\n')
@@ -81,12 +79,6 @@ class SSEParser:
 # Set MPS fallback before imports
 os.environ['PYTORCH_ENABLE_MPS_FALLBACK'] = '1'
 
-try:
-    from RealtimeTTS import TextToAudioStream, CoquiEngine
-except ImportError as e:
-    logger.error("Failed to import RealtimeTTS dependencies: %s", e)
-    raise
-
 
 class LocalTTS(tts.TTS):
     """
@@ -98,9 +90,9 @@ class LocalTTS(tts.TTS):
         self,
         *,
         language: str = "ru",
-        model_path: str = "models/Lasinya",
-        voice_reference_path: str = "voice/reference_audio.wav",
-        device: str = "cuda",
+        model_path: str = "XTTS_models/Lasinya",
+        voice_reference_path: str = "characters/reference_audio.wav",
+        device: str = "cpu",
         sample_rate: int = 24000,
     ) -> None:
         """
@@ -120,8 +112,8 @@ class LocalTTS(tts.TTS):
         )
 
         self._language = language
-        self._model_path = f"a{model_path}"
-        self._voice_reference_path = f"/Users/y.stepin/dev/agents/{voice_reference_path}"
+        self._model_path = model_path
+        self._voice_reference_path = voice_reference_path
         self._device = device
         self._engine: CoquiEngine | None = None
         self._stream: TextToAudioStream | None = None
@@ -142,8 +134,13 @@ class LocalTTS(tts.TTS):
         try:
             # Initialize CoquiEngine with voice cloning
             self._engine = CoquiEngine(
-                language=self._language,
-                device=self._device,
+                voice=CoquiVoice(
+                    model_path=self._model_path,
+                    local_models_path=self._model_path,
+                    device=self._device,
+                    enable_text_splitting=True,
+                    language=self._language
+                )
             )
             
             logger.info("XTTS engine initialized successfully")

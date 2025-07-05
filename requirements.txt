@@ -1,7 +1,7 @@
 llama-cpp-python
 huggingface-hub
-RealtimeSTT
-RealtimeTTS[coqui]
+livekit-agents[openai,silero,turn-detector, fal]~=1.0
+RealtimeTTS[coqui]==0.5.6,
 sounddevice
 pyaudio
 torch
